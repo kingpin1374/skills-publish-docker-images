@@ -13,14 +13,22 @@ jobs:
   build-and-push:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Log in to the Container registry
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
+          # Using the automatic GITHUB_TOKEN provided by the workflow
           password: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Build and push Docker image
         run: |
-          docker build . --tag ghcr.io/kingpin1374/skills-publish-docker-images/stackoverflown:main
-          docker push ghcr.io/kingpin1374/skills-publish-docker-images/stackoverflown:main
+          # Lowercase the image path to ensure compatibility with GHCR
+          IMAGE_ID=ghcr.io/${{ github.repository_owner }}/stackoverflown
+          IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
+          
+          docker build . --tag $IMAGE_ID:main
+          docker push $IMAGE_ID:main
